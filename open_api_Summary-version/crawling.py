@@ -59,8 +59,3 @@ def load_notices_from_json(file_path):
         with open(file_path, 'r', encoding='utf-8') as json_file:
             return json.load(json_file)
     return []
-
-# Example usage
-file_path = 'notices.json'
-notices = get_today_notices()
-save_notices_to_json(notices, file_path)
