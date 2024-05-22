@@ -3,7 +3,7 @@ import datetime
 import win32con
 import win32api
 import win32gui
-import requests
+import os
 import json
 import logging
 
@@ -102,15 +102,22 @@ def get_all_notices():
 
     return all_notices
 
+def save_notices_to_json(notices, file_path):
+    with open(file_path, 'w', encoding='utf-8') as json_file:
+        json.dump(notices, json_file, ensure_ascii=False, indent=4)
 
-# # 스케줄러 job : 매 시간마다 공지사항 크롤링해서 가져오기
+def load_notices_from_json(file_path):
+    if os.path.exists(file_path):
+        with open(file_path, 'r', encoding='utf-8') as json_file:
+            return json.load(json_file)
+    return []
+
 def job():
-    # 채팅방 열기
     open_chatroom(kakao_opentalk_name)
     noticeList = get_all_notices()
-
-    # 메시지 전송, time/실검
-    kakao_sendtext(kakao_opentalk_name, noticeList)
+    save_notices_to_json(noticeList, 'notices.json')
+    loaded_notices = load_notices_from_json('notices.json')
+    kakao_sendtext(kakao_opentalk_name, loaded_notices)
 
 
 # # log 환경설정
