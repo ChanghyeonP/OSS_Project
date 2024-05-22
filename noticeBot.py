@@ -177,11 +177,24 @@ def load_notices_from_json(file_path):
     return []
 
 
+""" -- 이전버전
 def filter_new_notices(new_notices, existing_notices):
     existing_titles = {notice['title'] for notice in existing_notices}
     filtered_notices = [
         notice for notice in new_notices if notice['title'] not in existing_titles]
     return filtered_notices
+"""
+    
+def filter_new_notices(new_notices, existing_notices):
+    try:
+        existing_titles = {notice['title'] for notice in existing_notices}
+        filtered_notices = [notice for notice in new_notices if notice['title'] not in existing_titles]
+        return filtered_notices
+    except Exception as e:
+        logging.exception("Failed to filter new notices")
+        return []
+
+
 
 def job():
     file_path = os.path.join(current_dir, 'notices.json')
