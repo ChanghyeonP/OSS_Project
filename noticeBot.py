@@ -112,12 +112,22 @@ def load_notices_from_json(file_path):
             return json.load(json_file)
     return []
 
+def filter_new_notices(new_notices, existing_notices):
+    existing_titles = {notice['title'] for notice in existing_notices}
+    filtered_notices = [
+        notice for notice in new_notices if notice['title'] not in existing_titles]
+    return filtered_notices
+
 def job():
-    open_chatroom(kakao_opentalk_name)
-    noticeList = get_all_notices()
-    save_notices_to_json(noticeList, 'notices.json')
-    loaded_notices = load_notices_from_json('notices.json')
-    kakao_sendtext(kakao_opentalk_name, loaded_notices)
+    file_path = os.path.join(current_dir, 'notices.json')
+    existing_notices = load_notices_from_json(file_path)
+    new_notices = get_all_notices()
+    filtered_notices = filter_new_notices(new_notices, existing_notices)
+
+    if filtered_notices:
+        save_notices_to_json(existing_notices + filtered_notices, file_path)
+        open_chatroom(kakao_opentalk_name)  # 채팅방 열기
+        kakao_sendtext(kakao_opentalk_name, filtered_notices)
 
 
 # # log 환경설정
@@ -141,6 +151,8 @@ def set_logger():
 
 
 def main():
+    global current_dir
+    current_dir = os.path.dirname(os.path.abspath(__file__))
     sched = BackgroundScheduler()
     sched.start()
     set_logger()
