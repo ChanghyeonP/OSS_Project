@@ -46,9 +46,13 @@ def kakao_sendtext(chatroom_name, noticeList):
 
 # # 엔터
 def SendReturn(hwnd):
-    win32api.PostMessage(hwnd, win32con.WM_KEYDOWN, win32con.VK_RETURN, 0)
-    time.sleep(0.01)
-    win32api.PostMessage(hwnd, win32con.WM_KEYUP, win32con.VK_RETURN, 0)
+    try:
+        win32api.PostMessage(hwnd, win32con.WM_KEYDOWN, win32con.VK_RETURN, 0)
+        time.sleep(0.01)
+        win32api.PostMessage(hwnd, win32con.WM_KEYUP, win32con.VK_RETURN, 0)
+    except Exception as e:
+        logging.exception("Failed to send return key")
+
 
 
 # # 채팅방 열기
