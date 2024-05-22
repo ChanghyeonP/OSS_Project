@@ -73,7 +73,7 @@ def open_chatroom(chatroom_name):
         time.sleep(1)
     except Exception as e:
         logging.exception("Failed to open Kakao chatroom")
-        
+
 
 """" --이전버전
 
@@ -144,6 +144,7 @@ def get_all_notices():
     return all_notices
 
 
+""" -- 이전버전
 
 def save_notices_to_json(notices, file_path):
     with open(file_path, 'w', encoding='utf-8') as json_file:
@@ -154,6 +155,15 @@ def load_notices_from_json(file_path):
         with open(file_path, 'r', encoding='utf-8') as json_file:
             return json.load(json_file)
     return []
+"""
+
+def save_notices_to_json(notices, file_path):
+    try:
+        with open(file_path, 'w', encoding='utf-8') as json_file:
+            json.dump(notices, json_file, ensure_ascii=False, indent=4)
+    except Exception as e:
+        logging.exception("Failed to save notices to JSON")
+
 
 def filter_new_notices(new_notices, existing_notices):
     existing_titles = {notice['title'] for notice in existing_notices}
