@@ -4,11 +4,7 @@ import datetime
 import logging
 import os
 import requests
-
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.common.by import By
+from bs4 import BeautifulSoup
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from logging.handlers import TimedRotatingFileHandler
@@ -32,37 +28,32 @@ headers = {
 # 공지사항 크롤링하기
 
 
-def get_all_notices():
-    # Chrome 드라이버 설정
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+def get_today_notices():
 
-    today = datetime.date.today().strftime("%Y-%m-%d")
+    # URL 가져오기
+    url = 'https://www.daegu.ac.kr/article/DG159/list?pageIndex=1&'
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, 'html.parser')
 
-    # 원하는 URL 열기
-    driver.get('https://www.daegu.ac.kr/article/DG159/list?pageIndex=1&')
-
-    # 모든 공지사항 요소 가져오기
-    notice_elements = driver.find_elements(By.CSS_SELECTOR, '#sub_contents > div > table > tbody > tr')
-    
     # 공지사항을 담을 리스트 초기화
-    all_notices = []
+    today_notices = []
+
+    # 공지사항 요소 가져오기
+    notice_elements = soup.select('#sub_contents > div > table > tbody > tr')
 
     # 각 공지사항 요소에서 제목과 링크 추출하여 리스트에 추가
     for idx, element in enumerate(notice_elements, start=1):
-        if idx <= 12:  # 12번째 공지사항은 리스트에 추가하지 않음
+        if idx <= 12:
             continue
-        title_element = element.find_element(By.CSS_SELECTOR, 'td.list_left > a')
-        date_element = element.find_element(By.CSS_SELECTOR, 'td:nth-child(5)')  # 공지사항의 날짜 요소 선택
+        title_element = element.select_one('td.list_left > a')
+        date_element = element.select_one('td:nth-child(5)')
         title = title_element.text.strip()
         date = date_element.text.strip()
-        link = title_element.get_attribute('href')
+        link = title_element['href']
 
-        if date == today:
-            all_notices.append({'date': date, 'title': title, 'link': link})    # 브라우저 닫기
-    
-    driver.quit()
+        today_notices.append({'date': date, 'title': title, 'link': link})
 
-    return all_notices
+    return today_notices
 
 
 def save_notices_to_json(notices, file_path):
