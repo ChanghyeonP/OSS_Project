@@ -58,22 +58,22 @@ def SendReturn(hwnd):
 # # 채팅방 열기
 def open_chatroom(chatroom_name):
     # # # 채팅방 목록 검색하는 Edit (채팅방이 열려있지 않아도 전송 가능하기 위하여)
-    hwndkakao = win32gui.FindWindow(None, "카카오톡")
-    hwndkakao_edit1 = win32gui.FindWindowEx(
-        hwndkakao, None, "EVA_ChildWindow", None)
-    hwndkakao_edit2_1 = win32gui.FindWindowEx(
-        hwndkakao_edit1, None, "EVA_Window", None)
-    hwndkakao_edit2_2 = win32gui.FindWindowEx(
-        hwndkakao_edit1, hwndkakao_edit2_1, "EVA_Window", None)
-    hwndkakao_edit3 = win32gui.FindWindowEx(
-        hwndkakao_edit2_2, None, "Edit", None)
+    try:
+        hwndkakao = win32gui.FindWindow(None, "카카오톡")
+        hwndkakao_edit1 = win32gui.FindWindowEx(hwndkakao, None, "EVA_ChildWindow", None)
+        hwndkakao_edit2_1 = win32gui.FindWindowEx(hwndkakao_edit1, None, "EVA_Window", None)
+        hwndkakao_edit2_2 = win32gui.FindWindowEx(hwndkakao_edit1, hwndkakao_edit2_1, "EVA_Window", None)
+        hwndkakao_edit3 = win32gui.FindWindowEx(hwndkakao_edit2_2, None, "Edit", None)
 
-    # # Edit에 검색 _ 입력되어있는 텍스트가 있어도 덮어쓰기됨
-    win32api.SendMessage(
-        hwndkakao_edit3, win32con.WM_SETTEXT, 0, chatroom_name)
-    time.sleep(1)   # 안정성 위해 필요
-    SendReturn(hwndkakao_edit3)
-    time.sleep(1)
+         # # Edit에 검색 _ 입력되어있는 텍스트가 있어도 덮어쓰기됨
+        win32api.SendMessage(
+            hwndkakao_edit3, win32con.WM_SETTEXT, 0, chatroom_name)
+        time.sleep(1)
+        SendReturn(hwndkakao_edit3)
+        time.sleep(1)
+    except Exception as e:
+        logging.exception("Failed to open Kakao chatroom")
+
 
 # 공지사항 크롤링하기
 
