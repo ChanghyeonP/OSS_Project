@@ -16,56 +16,64 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from logging.handlers import TimedRotatingFileHandler
 
 # # 카톡창 이름, (활성화 상태의 열려있는 창)
-kakao_opentalk_name = 'noticebot'
+kakao_opentalk_name = 'test'
 idx = 0
+
 
 
 # # 채팅방에 메시지 전송
 def kakao_sendtext(chatroom_name, noticeList):
-    # # 핸들 _ 채팅방
-    hwndMain = win32gui.FindWindow(None, chatroom_name)
-    hwndEdit = win32gui.FindWindowEx(hwndMain, None, "RICHEDIT50W", None)
+    try:
+         # # 핸들 _ 채팅방
+        hwndMain = win32gui.FindWindow(None, chatroom_name)
+        hwndEdit = win32gui.FindWindowEx(hwndMain, None, "RICHEDIT50W", None)
 
-    check = len(noticeList)
-    global idx
+        check = len(noticeList)
+        global idx
 
-    if(idx < check):
-        for i in range(idx, check):
-            win32api.SendMessage(
-                hwndEdit, win32con.WM_SETTEXT, 0, noticeList[i])
-            SendReturn(hwndEdit)
-            botLogger = logging.getLogger()
-            botLogger.debug(noticeList[i])
-            time.sleep(3)
-    idx = check
+        if(idx < check):
+            for i in range(idx, check):
+                win32api.SendMessage(
+                    hwndEdit, win32con.WM_SETTEXT, 0, noticeList[i])
+                SendReturn(hwndEdit)
+                botLogger = logging.getLogger()
+                botLogger.debug(noticeList[i])
+                time.sleep(3)
+        idx = check
+    except Exception as e:
+        logging.exception("Failed to send text to Kakao chatroom")
 
 
 # # 엔터
 def SendReturn(hwnd):
-    win32api.PostMessage(hwnd, win32con.WM_KEYDOWN, win32con.VK_RETURN, 0)
-    time.sleep(0.01)
-    win32api.PostMessage(hwnd, win32con.WM_KEYUP, win32con.VK_RETURN, 0)
+    try:
+        win32api.PostMessage(hwnd, win32con.WM_KEYDOWN, win32con.VK_RETURN, 0)
+        time.sleep(0.01)
+        win32api.PostMessage(hwnd, win32con.WM_KEYUP, win32con.VK_RETURN, 0)
+    except Exception as e:
+        logging.exception("Failed to send return key")
+
 
 
 # # 채팅방 열기
 def open_chatroom(chatroom_name):
     # # # 채팅방 목록 검색하는 Edit (채팅방이 열려있지 않아도 전송 가능하기 위하여)
-    hwndkakao = win32gui.FindWindow(None, "카카오톡")
-    hwndkakao_edit1 = win32gui.FindWindowEx(
-        hwndkakao, None, "EVA_ChildWindow", None)
-    hwndkakao_edit2_1 = win32gui.FindWindowEx(
-        hwndkakao_edit1, None, "EVA_Window", None)
-    hwndkakao_edit2_2 = win32gui.FindWindowEx(
-        hwndkakao_edit1, hwndkakao_edit2_1, "EVA_Window", None)
-    hwndkakao_edit3 = win32gui.FindWindowEx(
-        hwndkakao_edit2_2, None, "Edit", None)
+    try:
+        hwndkakao = win32gui.FindWindow(None, "카카오톡")
+        hwndkakao_edit1 = win32gui.FindWindowEx(hwndkakao, None, "EVA_ChildWindow", None)
+        hwndkakao_edit2_1 = win32gui.FindWindowEx(hwndkakao_edit1, None, "EVA_Window", None)
+        hwndkakao_edit2_2 = win32gui.FindWindowEx(hwndkakao_edit1, hwndkakao_edit2_1, "EVA_Window", None)
+        hwndkakao_edit3 = win32gui.FindWindowEx(hwndkakao_edit2_2, None, "Edit", None)
 
-    # # Edit에 검색 _ 입력되어있는 텍스트가 있어도 덮어쓰기됨
-    win32api.SendMessage(
-        hwndkakao_edit3, win32con.WM_SETTEXT, 0, chatroom_name)
-    time.sleep(1)   # 안정성 위해 필요
-    SendReturn(hwndkakao_edit3)
-    time.sleep(1)
+         # # Edit에 검색 _ 입력되어있는 텍스트가 있어도 덮어쓰기됨
+        win32api.SendMessage(
+            hwndkakao_edit3, win32con.WM_SETTEXT, 0, chatroom_name)
+        time.sleep(1)
+        SendReturn(hwndkakao_edit3)
+        time.sleep(1)
+    except Exception as e:
+        logging.exception("Failed to open Kakao chatroom")
+
 
 # 공지사항 크롤링하기
 
