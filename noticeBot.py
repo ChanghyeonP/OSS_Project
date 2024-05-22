@@ -73,11 +73,12 @@ def open_chatroom(chatroom_name):
         time.sleep(1)
     except Exception as e:
         logging.exception("Failed to open Kakao chatroom")
+        
+
+"""" --이전버전
 
 
 # 공지사항 크롤링하기
-
-
 def get_all_notices():
     # Chrome 드라이버 설정
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
@@ -109,6 +110,40 @@ def get_all_notices():
     driver.quit()
 
     return all_notices
+"""
+
+
+# 공지사항 크롤링하기
+def get_all_notices():
+    driver = None
+    try:
+        driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+        today = datetime.date.today().strftime("%Y-%m-%d")
+        driver.get('https://www.daegu.ac.kr/article/DG159/list?pageIndex=1&')
+
+        notice_elements = driver.find_elements(By.CSS_SELECTOR, '#sub_contents > div > table > tbody > tr')
+        all_notices = []
+
+        for idx, element in enumerate(notice_elements, start=1):
+            if idx <= 12:
+                continue
+            title_element = element.find_element(By.CSS_SELECTOR, 'td.list_left > a')
+            date_element = element.find_element(By.CSS_SELECTOR, 'td:nth-child(5)')
+            title = title_element.text.strip()
+            date = date_element.text.strip()
+            link = title_element.get_attribute('href')
+
+            if date == today:
+                all_notices.append({'date': date, 'title': title, 'link': link})
+    except Exception as e:
+        logging.exception("Failed to get notices")
+    finally:
+        if driver:
+            driver.quit()
+    
+    return all_notices
+
+
 
 def save_notices_to_json(notices, file_path):
     with open(file_path, 'w', encoding='utf-8') as json_file:
