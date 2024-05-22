@@ -223,6 +223,7 @@ def job():
         logging.exception("Job execution failed")
 
 
+
 # # log 환경설정
 def set_logger():
     botLogger = logging.getLogger()
@@ -241,6 +242,7 @@ def set_logger():
     # 파일 이름 suffix 설정 (webCrawling.log.yyyy-mm-dd-hh-mm 형식)
     rotatingHandler.suffix = datetime.datetime.today().strftime("%Y-%m-%d-%H-%M")
     botLogger.addHandler(rotatingHandler)
+
 
 
 def main():
