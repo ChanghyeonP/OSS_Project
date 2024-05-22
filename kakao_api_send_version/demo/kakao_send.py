@@ -29,7 +29,7 @@ headers = {
 
 
 def get_today_notices():
-
+    # 오늘 날짜 가져오기
     today = datetime.date.today().strftime("%Y-%m-%d")
 
     # URL 가져오기
@@ -52,9 +52,8 @@ def get_today_notices():
         title = title_element.text.strip()
         date = date_element.text.strip()
         link = title_element['href']
-        
-        if date == today:
-            today_notices.append({'date': date, 'title': title, 'link': link})
+
+        today_notices.append({'date': date, 'title': title, 'link': link})
 
     return today_notices
 
@@ -70,6 +69,14 @@ def load_notices_from_json(file_path):
             return json.load(json_file)
     return []
 
+# 중복된 타이틀을 제거하고 새로운 공지사항만 JSON 파일에 저장
+
+
+def filter_new_notices(new_notices, existing_notices):
+    existing_titles = {notice['title'] for notice in existing_notices}
+    filtered_notices = [
+        notice for notice in new_notices if notice['title'] not in existing_titles]
+    return filtered_notices
 
 # 카카오톡 메시지 전송 함수
 
@@ -79,7 +86,7 @@ def send_kakao_message(new_notices):
         url = "https://kapi.kakao.com/v2/api/talk/memo/default/send"
         headers = {"Authorization": "Bearer " + tokens["access_token"]}
 
-        message_text = f"{notice['title']}"
+        message_text = f"{notice['title']}\n{notice['link']}"
         data = {
             "template_object": json.dumps({
                 "object_type": "text",
@@ -101,10 +108,14 @@ def send_kakao_message(new_notices):
 
 
 def job():
-    noticeList = get_today_notices()
-    save_notices_to_json(noticeList, 'notices.json')
-    loaded_notices = load_notices_from_json('notices.json')
-    send_kakao_message(loaded_notices)
+    file_path = os.path.join(current_dir, 'notices.json')
+    existing_notices = load_notices_from_json(file_path)
+    new_notices = get_today_notices()
+    filtered_notices = filter_new_notices(new_notices, existing_notices)
+
+    if filtered_notices:
+        save_notices_to_json(existing_notices + filtered_notices, file_path)
+        send_kakao_message(filtered_notices)
 
 # log 환경설정
 
@@ -130,7 +141,7 @@ def main():
     try:
         current_dir = os.path.dirname(os.path.abspath(__file__))
         file_path = os.path.join(current_dir, 'notices.json')
-        save_notices_to_json([], file_path)
+        # save_notices_to_json([], file_path)
         sched = BackgroundScheduler()
         sched.start()
     except Exception as e:
@@ -142,7 +153,7 @@ def main():
         print(f"Error in logger setup: {e}")
 
     try:
-        sched.add_job(job, 'interval', minutes=60)
+        sched.add_job(job, 'interval', minutes=0.5)
     except Exception as e:
         print(f"Error in adding job to scheduler: {e}")
 
