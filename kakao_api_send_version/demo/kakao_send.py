@@ -30,6 +30,8 @@ headers = {
 
 def get_today_notices():
 
+    today = datetime.date.today().strftime("%Y-%m-%d")
+
     # URL 가져오기
     url = 'https://www.daegu.ac.kr/article/DG159/list?pageIndex=1&'
     response = requests.get(url)
@@ -50,8 +52,9 @@ def get_today_notices():
         title = title_element.text.strip()
         date = date_element.text.strip()
         link = title_element['href']
-
-        today_notices.append({'date': date, 'title': title, 'link': link})
+        
+        if date == today:
+            today_notices.append({'date': date, 'title': title, 'link': link})
 
     return today_notices
 
@@ -98,7 +101,7 @@ def send_kakao_message(new_notices):
 
 
 def job():
-    noticeList = get_all_notices()
+    noticeList = get_today_notices()
     save_notices_to_json(noticeList, 'notices.json')
     loaded_notices = load_notices_from_json('notices.json')
     send_kakao_message(loaded_notices)
