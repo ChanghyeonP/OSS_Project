@@ -195,7 +195,7 @@ def filter_new_notices(new_notices, existing_notices):
         return []
 
 
-
+""" -- 이전 버전
 def job():
     file_path = os.path.join(current_dir, 'notices.json')
     existing_notices = load_notices_from_json(file_path)
@@ -206,6 +206,21 @@ def job():
         save_notices_to_json(existing_notices + filtered_notices, file_path)
         open_chatroom(kakao_opentalk_name)  # 채팅방 열기
         kakao_sendtext(kakao_opentalk_name, filtered_notices)
+"""
+
+def job():
+    try:
+        file_path = os.path.join(current_dir, 'notices.json')
+        existing_notices = load_notices_from_json(file_path)
+        new_notices = get_all_notices()
+        filtered_notices = filter_new_notices(new_notices, existing_notices)
+
+        if filtered_notices:
+            save_notices_to_json(existing_notices + filtered_notices, file_path)
+            open_chatroom(kakao_opentalk_name)
+            kakao_sendtext(kakao_opentalk_name, filtered_notices)
+    except Exception as e:
+        logging.exception("Job execution failed")
 
 
 # # log 환경설정
