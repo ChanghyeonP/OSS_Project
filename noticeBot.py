@@ -20,24 +20,28 @@ kakao_opentalk_name = 'test'
 idx = 0
 
 
+
 # # 채팅방에 메시지 전송
 def kakao_sendtext(chatroom_name, noticeList):
-    # # 핸들 _ 채팅방
-    hwndMain = win32gui.FindWindow(None, chatroom_name)
-    hwndEdit = win32gui.FindWindowEx(hwndMain, None, "RICHEDIT50W", None)
+    try:
+         # # 핸들 _ 채팅방
+        hwndMain = win32gui.FindWindow(None, chatroom_name)
+        hwndEdit = win32gui.FindWindowEx(hwndMain, None, "RICHEDIT50W", None)
 
-    check = len(noticeList)
-    global idx
+        check = len(noticeList)
+        global idx
 
-    if(idx < check):
-        for i in range(idx, check):
-            win32api.SendMessage(
-                hwndEdit, win32con.WM_SETTEXT, 0, noticeList[i])
-            SendReturn(hwndEdit)
-            botLogger = logging.getLogger()
-            botLogger.debug(noticeList[i])
-            time.sleep(3)
-    idx = check
+        if(idx < check):
+            for i in range(idx, check):
+                win32api.SendMessage(
+                    hwndEdit, win32con.WM_SETTEXT, 0, noticeList[i])
+                SendReturn(hwndEdit)
+                botLogger = logging.getLogger()
+                botLogger.debug(noticeList[i])
+                time.sleep(3)
+        idx = check
+    except Exception as e:
+        logging.exception("Failed to send text to Kakao chatroom")
 
 
 # # 엔터
