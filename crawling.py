@@ -4,9 +4,10 @@ import json
 import os
 import re
 from bs4 import BeautifulSoup
+from openai import OpenAI
+
 
 def get_today_notices():
-
     today = datetime.date.today().strftime("%Y-%m-%d")
     
     url = 'https://www.daegu.ac.kr/article/DG159/list?pageIndex=1&'
@@ -30,10 +31,24 @@ def get_today_notices():
         link = f"https://www.daegu.ac.kr/article/DG159/detail/{onclick_number}"
 
         if today == date:
-            today_notices.append({'date': date, 'title': title, 'link': link})
+            notice_text = f"{title} - {link}"
+            summary = get_summary(notice_text)
+            today_notices.append({'date': date, 'title': title, 'link': link, 'summary': summary})
     
     today_notices.reverse()
     return today_notices
+
+
+def get_summary(text):
+    client = OpenAI(api_key="your-keys")
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "user", "content": f"다음 공지사항의 요약을 3줄 이내로 작성해줘: {text}"}
+        ],
+    )
+    summary = response.choices[0].message.content.strip()
+    return summary
 
 def save_notices_to_json(notices, file_path):
     with open(file_path, 'w', encoding='utf-8') as json_file:
